@@ -1,6 +1,11 @@
+/// Documents the semantic Event source in UniLogger in the shared Swift packages.
+///
+/// Primary declarations include `SemanticEvent`.
+
 import Foundation
 import Logging
 
+/// Defines the semantic Event value used by UniLogger in the shared Swift packages.
 public struct SemanticEvent: Sendable {
     public var name: String
     public var component: String

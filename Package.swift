@@ -1,6 +1,8 @@
+
 // swift-tools-version: 6.2
 import PackageDescription
 
+/// Stores package for UniLogger in the shared Swift packages.
 let package = Package(
     name: "UniLogger",
     platforms: [

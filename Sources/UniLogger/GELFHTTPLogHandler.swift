@@ -1,3 +1,7 @@
+/// Documents the gelfhttp Log Handler source in UniLogger in the shared Swift packages.
+///
+/// Primary declarations include `GELFHTTPLogHandler`, `Logger.MetadataValue`, `GELFHTTPClient`, and `DiskSpool`.
+
 import Foundation
 import Logging
 
@@ -239,6 +243,7 @@ public struct GELFHTTPLogHandler: LogHandler {
 
 // MARK: - Metadata flattening
 
+/// Extends `Logger.MetadataValue` with behavior used by UniLogger in the shared Swift packages.
 private extension Logger.MetadataValue {
     var flattenedString: String {
         switch self {
@@ -257,6 +262,7 @@ private extension Logger.MetadataValue {
 
 // MARK: - GELFHTTPClient (batching + backoff + redaction)
 
+/// Coordinates gelfhttp Client responsibilities for UniLogger in the shared Swift packages.
 public actor GELFHTTPClient {
     private let config: GELFHTTPLogHandler.Configuration
     private let session: URLSession
@@ -501,6 +507,7 @@ public actor GELFHTTPClient {
 
 // MARK: - Disk spool (segment files + state)
 
+/// Defines the disk Spool value used by UniLogger in the shared Swift packages.
 private struct DiskSpool {
     private struct State: Codable {
         var readSegment: Int
@@ -828,6 +835,7 @@ private struct DiskSpool {
     }
 }
 
+/// Defines the spool Batch value used by UniLogger in the shared Swift packages.
 private struct SpoolBatch {
     let data: Data
     let count: Int

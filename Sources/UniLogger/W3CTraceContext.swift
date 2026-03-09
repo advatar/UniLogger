@@ -1,6 +1,11 @@
+/// Documents the w3 C Trace Context source in UniLogger in the shared Swift packages.
+///
+/// Primary declarations include `TraceIdentifiers` and `TraceParent`.
+
 import Foundation
 import Security
 
+/// Defines trace Identifiers cases used by UniLogger in the shared Swift packages.
 public enum TraceIdentifiers {
     public static func traceID() -> String {
         randomHex(byteCount: 16)
@@ -22,6 +27,7 @@ public enum TraceIdentifiers {
     }
 }
 
+/// Defines the trace Parent value used by UniLogger in the shared Swift packages.
 public struct TraceParent: Sendable {
     public var version: String
     public var traceID: String

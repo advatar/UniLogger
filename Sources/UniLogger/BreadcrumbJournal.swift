@@ -1,5 +1,10 @@
+/// Documents the breadcrumb Journal source in UniLogger in the shared Swift packages.
+///
+/// Primary declarations include `Breadcrumb` and `BreadcrumbJournal`.
+
 import Foundation
 
+/// Defines the breadcrumb value used by UniLogger in the shared Swift packages.
 public struct Breadcrumb: Sendable, Codable {
     public var tMillis: Int
     public var event: String
@@ -12,6 +17,7 @@ public struct Breadcrumb: Sendable, Codable {
     }
 }
 
+/// Implements the breadcrumb Journal type for UniLogger in the shared Swift packages.
 public final class BreadcrumbJournal: @unchecked Sendable {
     public struct Configuration: Sendable {
         public var maxEvents: Int = 25

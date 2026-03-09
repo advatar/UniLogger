@@ -1,6 +1,11 @@
+/// Documents the trace Context source in UniLogger in the shared Swift packages.
+///
+/// Primary declarations include `TraceContext`.
+
 import Foundation
 import Logging
 
+/// Defines trace Context cases used by UniLogger in the shared Swift packages.
 public enum TraceContext {
     @TaskLocal public static var current: Context?
 

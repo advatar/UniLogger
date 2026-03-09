@@ -1,7 +1,12 @@
+/// Exercises uni Logger Tests behavior for UniLogger in the shared Swift packages.
+///
+/// Primary declarations include `UniLoggerTests`.
+
 import Foundation
 import XCTest
 @testable import UniLogger
 
+/// Implements the uni logger tests type for the UniLogger module.
 final class UniLoggerTests: XCTestCase {
     func testConfigurationDefaults() throws {
         let endpoint = try XCTUnwrap(URL(string: "https://example.com/gelf"))
