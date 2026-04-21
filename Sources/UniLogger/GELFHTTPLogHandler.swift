@@ -483,8 +483,8 @@ public actor GELFHTTPClient {
     private func redactString(_ value: String) -> String {
         guard config.redaction.enabled else { return value }
         var output = value
-        let fullRange = NSRange(output.startIndex..<output.endIndex, in: output)
         for (regex, replacement) in messageRedactors {
+            let fullRange = NSRange(output.startIndex..<output.endIndex, in: output)
             output = regex.stringByReplacingMatches(in: output, options: [], range: fullRange, withTemplate: replacement)
         }
         return output

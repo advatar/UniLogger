@@ -104,4 +104,26 @@ final class UniLoggerTests: XCTestCase {
         XCTAssertEqual(parsed.spanID, spanID)
         XCTAssertEqual(parsed.traceFlags, "01")
     }
+
+    func testRedactionRecomputesRangeAfterEachReplacement() async throws {
+        let endpoint = try XCTUnwrap(URL(string: "https://example.com/gelf"))
+        var config = GELFHTTPLogHandler.Configuration(endpoint: endpoint, host: "com.example.app")
+        config.batchSize = 100
+        config.spool.enabled = false
+
+        let client = GELFHTTPClient(config: config)
+        let message = GELFHTTPLogHandler.GELFMessage(
+            host: "com.example.app",
+            shortMessage: "user extremely.long.email.address@example.com Bearer abcdefghijklmnopqrstuvwxyz",
+            fullMessage: nil,
+            timestamp: 0,
+            level: 6,
+            facility: nil,
+            additional: [
+                "_detail": "contact extremely.long.email.address@example.com with Bearer abcdefghijklmnopqrstuvwxyz"
+            ]
+        )
+
+        await client.enqueue(message)
+    }
 }
