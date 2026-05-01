@@ -57,6 +57,7 @@ final class UniLoggerTests: XCTestCase {
         let ctx = TraceContext.Context(
             traceID: "trace-123",
             spanID: "span-456",
+            flowID: "flow-abc",
             parentSpanID: "parent-789",
             service: "svc",
             sessionID: "sess"
@@ -76,6 +77,12 @@ final class UniLoggerTests: XCTestCase {
             XCTAssertEqual(value, "span-456")
         } else {
             XCTFail("missing _span_id")
+        }
+
+        if case .string(let value) = metadata["_flow_id"] {
+            XCTAssertEqual(value, "flow-abc")
+        } else {
+            XCTFail("missing _flow_id")
         }
 
         if case .string(let value) = metadata["_parent_span_id"] {
@@ -125,5 +132,36 @@ final class UniLoggerTests: XCTestCase {
         )
 
         await client.enqueue(message)
+    }
+
+    func testGELFRedactionMasksSensitiveMessagesAndMetadata() async throws {
+        let endpoint = try XCTUnwrap(URL(string: "https://example.com/gelf"))
+        var config = GELFHTTPLogHandler.Configuration(endpoint: endpoint, host: "com.example.app")
+        config.spool.enabled = false
+
+        let client = GELFHTTPClient(config: config)
+        let message = GELFHTTPLogHandler.GELFMessage(
+            host: "com.example.app",
+            shortMessage: "Contact beta.user@example.com with Bearer abcdefghijklmnopqrstuvwxyz",
+            fullMessage: "JWT eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.signatureValue appears here",
+            timestamp: 0,
+            level: 6,
+            facility: nil,
+            additional: [
+                "_detail": "secondary beta.user@example.com token Bearer abcdefghijklmnopqrstuvwxyz",
+                "_auth_token": "secret-value",
+                "_plain": "safe"
+            ]
+        )
+
+        let redacted = await client.redactedMessageForTesting(message)
+
+        XCTAssertFalse(redacted.shortMessage.contains("beta.user@example.com"))
+        XCTAssertFalse(redacted.shortMessage.contains("abcdefghijklmnopqrstuvwxyz"))
+        XCTAssertEqual(redacted.shortMessage, "Contact <redacted-email> with Bearer <redacted>")
+        XCTAssertEqual(redacted.fullMessage, "JWT <redacted-jwt> appears here")
+        XCTAssertEqual(redacted.additional["_auth_token"], "<redacted>")
+        XCTAssertEqual(redacted.additional["_plain"], "safe")
+        XCTAssertEqual(redacted.additional["_detail"], "secondary <redacted-email> token Bearer <redacted>")
     }
 }

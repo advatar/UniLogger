@@ -12,6 +12,7 @@ public enum TraceContext {
     public struct Context: Sendable {
         public var traceID: String
         public var spanID: String
+        public var flowID: String?
         public var parentSpanID: String?
         public var service: String?
         public var sessionID: String?
@@ -21,6 +22,7 @@ public enum TraceContext {
         public init(
             traceID: String,
             spanID: String,
+            flowID: String? = nil,
             parentSpanID: String? = nil,
             service: String? = nil,
             sessionID: String? = nil,
@@ -29,6 +31,7 @@ public enum TraceContext {
         ) {
             self.traceID = traceID
             self.spanID = spanID
+            self.flowID = flowID
             self.parentSpanID = parentSpanID
             self.service = service
             self.sessionID = sessionID
@@ -70,7 +73,8 @@ public enum TraceContext {
     private static func metadata(from ctx: Context) -> Logger.Metadata {
         var md: Logger.Metadata = [
             "_trace_id": .string(ctx.traceID),
-            "_span_id": .string(ctx.spanID)
+            "_span_id": .string(ctx.spanID),
+            "_flow_id": .string(ctx.flowID ?? ctx.traceID)
         ]
         if let parent = ctx.parentSpanID {
             md["_parent_span_id"] = .string(parent)

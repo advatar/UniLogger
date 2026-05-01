@@ -335,6 +335,10 @@ public actor GELFHTTPClient {
         }
     }
 
+    func redactedMessageForTesting(_ message: GELFHTTPLogHandler.GELFMessage) -> GELFHTTPLogHandler.GELFMessage {
+        applyRedaction(message)
+    }
+
     public func flushIfNeeded() async {
         guard !memoryQueue.isEmpty || (spool?.hasPendingData ?? false) else { return }
         triggerFlush()
