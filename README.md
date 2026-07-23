@@ -1,12 +1,72 @@
 # UniLogger
 
-Swift Package providing a GELF-over-HTTP `LogHandler` intended for Graylog ingest via a TLS-terminated reverse proxy. Key traits:
+Swift package providing production-oriented remote `LogHandler` transports for
+[`swift-log`](https://github.com/apple/swift-log):
 
-- Batching with newline-delimited JSON (enable **Bulk Receiving** on the Graylog GELF HTTP input)
+- `LoggifyHTTPLogHandler` emits vendor-neutral OTLP/HTTP JSON through an
+  authenticated Loggify gateway.
+- `GELFHTTPLogHandler` preserves direct Graylog compatibility for existing
+  deployments.
+
+Both transports provide:
+
+- Bounded batching appropriate to each wire format
 - Exponential backoff with jitter for retries
 - Metadata/message redaction hooks to limit sensitive fields
 - Offline-first (disk-backed spool) with bounded disk usage and redaction before disk
 - Plays nicely with multiplexed logging (console, OSLog, Graylog)
+
+## Loggify transport
+
+Use this transport for new applications. The handler maps UniLogger's semantic
+metadata and W3C trace context to Loggify schema v1, redacts records before
+disk, batches them into OTLP resource logs, and sends them to `/v1/logs`.
+
+```swift
+import Logging
+import UniLogger
+
+let gateway = URL(string: "https://gateway-production-79ac.up.railway.app")!
+var config = LoggifyHTTPLogHandler.Configuration(
+    endpoint: gateway,
+    projectKey: "<project-scoped-ingest-key>",
+    service: "ios-app",
+    environment: "production"
+)
+config.staticAttributes = ["service.version": "1.0.0"]
+
+let client = LoggifyHTTPClient(configuration: config)
+LoggingSystem.bootstrap { label, metadataProvider in
+    LoggifyHTTPLogHandler(
+        label: label,
+        configuration: config,
+        client: client
+    )
+}
+```
+
+Keep the ingest key outside source control. It identifies and rate-limits a
+project; it is not a Collector or storage-administrator credential.
+
+Call `await client.flush()` from an application lifecycle hook before
+suspension. Failed records remain in UniLogger's bounded spool and retry on the
+next opportunity.
+
+### Compatibility mapping
+
+| UniLogger metadata | Loggify OTLP representation |
+| --- | --- |
+| `_event` | LogRecord `eventName` |
+| `_trace_id` | LogRecord `traceId` |
+| `_span_id` | LogRecord `spanId` |
+| `_component` | `loggify.component` |
+| `_operation` | `loggify.operation` |
+| `_flow_id` | `loggify.flow.id` |
+| `_trace_history` | `loggify.trace.history` |
+
+The configured `service` and `environment` become trusted OTLP resource
+attributes. The Loggify gateway replaces tenant and deployment identity using
+the project key.
 
 ## Adding the package
 
