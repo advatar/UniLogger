@@ -244,7 +244,7 @@ public struct GELFHTTPLogHandler: LogHandler {
 // MARK: - Metadata flattening
 
 /// Extends `Logger.MetadataValue` with behavior used by UniLogger in the shared Swift packages.
-private extension Logger.MetadataValue {
+extension Logger.MetadataValue {
     var flattenedString: String {
         switch self {
         case .string(let string):
@@ -512,7 +512,7 @@ public actor GELFHTTPClient {
 // MARK: - Disk spool (segment files + state)
 
 /// Defines the disk Spool value used by UniLogger in the shared Swift packages.
-private struct DiskSpool {
+struct DiskSpool {
     private struct State: Codable {
         var readSegment: Int
         var readOffset: Int
@@ -840,7 +840,7 @@ private struct DiskSpool {
 }
 
 /// Defines the spool Batch value used by UniLogger in the shared Swift packages.
-private struct SpoolBatch {
+struct SpoolBatch {
     let data: Data
     let count: Int
     let nextReadSegment: Int
